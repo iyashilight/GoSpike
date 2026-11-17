@@ -1,5 +1,7 @@
 # GoSpike · 秒杀电商系统
 
+> **中文** | [English](README.en.md)
+
 基于 [go-zero](https://github.com/zeromicro/go-zero) 的秒杀（Flash Sale）电商示例项目。
 
 后端由 **1 个 REST 网关 + 4 个 gRPC 微服务**组成，前端是 **Vue 3 + TypeScript** 写成的运营管理后台。
