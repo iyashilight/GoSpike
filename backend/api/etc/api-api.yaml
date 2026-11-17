@@ -1,0 +1,18 @@
+Name: api-api
+Host: 0.0.0.0
+Port: 8888
+JwtSecret: ${JWT_SECRET}
+BizRedis:
+  Host: redis:6379
+UserRpc:
+  Target: user:8081
+  Timeout: 3000
+ProductRpc:
+  Target: product:8082
+  Timeout: 3000
+OrderRpc:
+  Target: order:8083
+  Timeout: 5000
+FlashsaleRpc:
+  Target: flashsale:8084
+  Timeout: 3000

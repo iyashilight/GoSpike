@@ -1,0 +1,14 @@
+Name: order.rpc
+ListenOn: 0.0.0.0:8083
+Mode: dev
+DataSource: ${MYSQL_DSN}
+Cache:
+  - Host: redis:6379
+ProductRpc:
+  Target: product:8082
+  Timeout: 3000
+RabbitMQ:
+  Host: rabbitmq
+  Port: 5672
+  Username: ${RABBITMQ_USER}
+  Password: ${RABBITMQ_PASS}

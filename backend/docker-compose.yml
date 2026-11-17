@@ -1,0 +1,165 @@
+# 敏感配置统一从同目录的 .env 读取（.env 已被 .gitignore 忽略）
+# 首次使用：cp .env.example .env，然后填入自己的密码与密钥
+x-mysql-dsn: &mysql-dsn "root:${MYSQL_ROOT_PASSWORD}@tcp(mysql:3306)/gospike?charset=utf8mb4&parseTime=true&loc=Local"
+
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?请在 backend/.env 中设置 MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: gospike
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init/sql:/docker-entrypoint-initdb.d
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    restart: unless-stopped
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  user:
+    build:
+      context: .
+      dockerfile: user/Dockerfile
+    restart: unless-stopped
+    environment:
+      MYSQL_DSN: *mysql-dsn
+      REDIS_HOST: redis:6379
+      JWT_SECRET: ${JWT_SECRET:?请在 backend/.env 中设置 JWT_SECRET}
+      USER_LISTEN: 0.0.0.0:8081
+      MODE: dev
+    ports:
+      - "8081:8081"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  product:
+    build:
+      context: .
+      dockerfile: product/Dockerfile
+    restart: unless-stopped
+    environment:
+      MYSQL_DSN: *mysql-dsn
+      REDIS_HOST: redis:6379
+      PRODUCT_LISTEN: 0.0.0.0:8082
+      MODE: dev
+    ports:
+      - "8082:8082"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  order:
+    build:
+      context: .
+      dockerfile: order/Dockerfile
+    restart: unless-stopped
+    environment:
+      MYSQL_DSN: *mysql-dsn
+      REDIS_HOST: redis:6379
+      PRODUCT_RPC_TARGET: product:8082
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
+      ORDER_LISTEN: 0.0.0.0:8083
+      MODE: dev
+    ports:
+      - "8083:8083"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      product:
+        condition: service_started
+
+  flashsale:
+    build:
+      context: .
+      dockerfile: flashsale/Dockerfile
+    restart: unless-stopped
+    environment:
+      REDIS_HOST: redis:6379
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
+      FLASHSALE_LISTEN: 0.0.0.0:8084
+      MODE: dev
+    ports:
+      - "8084:8084"
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    restart: unless-stopped
+    environment:
+      JWT_SECRET: ${JWT_SECRET:?请在 backend/.env 中设置 JWT_SECRET}
+      REDIS_HOST: redis:6379
+      USER_RPC_TARGET: user:8081
+      PRODUCT_RPC_TARGET: product:8082
+      ORDER_RPC_TARGET: order:8083
+      FLASHSALE_RPC_TARGET: flashsale:8084
+      API_HOST: 0.0.0.0
+      API_PORT: 8888
+      MODE: dev
+    ports:
+      - "8888:8888"
+    depends_on:
+      redis:
+        condition: service_healthy
+      user:
+        condition: service_started
+      product:
+        condition: service_started
+      order:
+        condition: service_started
+      flashsale:
+        condition: service_started
+
+volumes:
+  mysql_data:
+  redis_data:

@@ -1,0 +1,162 @@
+syntax = "v1"
+
+type FlashPurchaseRequest {
+    UserId    int64 `json:"user_id" validate:"required,gt=0"`
+    ProductId int64 `json:"product_id" validate:"required,gt=0"`
+    Quantity  int32 `json:"quantity" validate:"required,gt=0"`
+}
+
+type FlashPurchaseResponse {
+    OrderId int64  `json:"order_id"`
+    Status  string `json:"status"`
+}
+
+type CacheStockRequest {
+    ProductId int64 `json:"product_id" validate:"required,gt=0"`
+    Stock     int32 `json:"stock" validate:"required,gt=0"`
+}
+
+type CacheStockResponse {}
+
+type User {
+	Id       int64  `path:"id" validate:"gt=0"`
+	Name     string `json:"name" validate:"required,min=2,max=50"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=6"`
+}
+
+type RegisterRequest {
+	Name     string `json:"name" validate:"required,min=2,max=50"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=6"`
+}
+
+type RegisterResponse {
+	Id int64 `json:"id"`
+}
+
+type LoginRequest {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
+}
+
+type LoginResponse {
+	Id    int64  `json:"id"`
+	Name  string `json:"name"`
+	Token string `json:"token"`
+}
+
+type GetUserResponse {
+	Id    int64  `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+
+type GetUserRequest {
+	Id int64 `path:"id" validate:"gt=0"`
+}
+
+type CreateProductRequest {
+	Name        string  `json:"name" validate:"required,min=1,max=100"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price" validate:"required,gt=0"`
+	Stock       int32   `json:"stock" validate:"required,gt=0"`
+}
+
+type CreateProductResponse {
+	Id int64 `json:"id"`
+}
+
+type GetProductRequest {
+	Id int64 `path:"id" validate:"gt=0"`
+}
+
+type GetProductResponse {
+	Id          int64   `json:"id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price"`
+	Stock       int32   `json:"stock"`
+	CreatedAt   string  `json:"created_at"`
+}
+
+type UpdateProductRequest {
+	Id          int64   `path:"id" validate:"gt=0"`
+	Name        string  `json:"name" validate:"required,min=1,max=100"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price" validate:"required,gt=0"`
+	Stock       int32   `json:"stock" validate:"required,gt=0"`
+}
+
+type UpdateProductResponse {}
+
+type DeleteProductRequest {
+	Id int64 `path:"id" validate:"gt=0"`
+}
+
+type DeleteProductResponse {}
+
+type OrderItemParam {
+	ProductId   int64   `json:"product_id" validate:"required,gt=0"`
+	ProductName string  `json:"product_name" validate:"required"`
+	Price       float64 `json:"price" validate:"required,gt=0"`
+	Quantity    int32   `json:"quantity" validate:"required,gt=0"`
+}
+
+type CreateOrderRequest {
+	UserId int64            `json:"user_id" validate:"required,gt=0"`
+	Items  []OrderItemParam `json:"items" validate:"required,min=1"`
+}
+
+type CreateOrderResponse {
+	OrderId int64 `json:"order_id"`
+}
+
+type GetOrderRequest {
+	OrderId int64 `path:"order_id" validate:"gt=0"`
+}
+
+type GetOrderResponse {
+	OrderId    int64            `json:"order_id"`
+	UserId     int64            `json:"user_id"`
+	TotalPrice float64          `json:"total_price"`
+	Status     string           `json:"status"`
+	Items      []OrderItemParam `json:"items"`
+	CreatedAt  string           `json:"created_at"`
+}
+
+service api-api {
+	@handler RegisterHandler
+	post /api/user/register (RegisterRequest) returns (RegisterResponse)
+
+	@handler LoginHandler
+	post /api/user/login (LoginRequest) returns (LoginResponse)
+
+	@handler GetUserHandler
+	get /api/user/:id (GetUserRequest) returns (GetUserResponse)
+
+	@handler CreateProductHandler
+	post /api/product/create (CreateProductRequest) returns (CreateProductResponse)
+
+	@handler GetProductHandler
+	get /api/product/:id (GetProductRequest) returns (GetProductResponse)
+
+	@handler UpdateProductHandler
+	put /api/product/:id (UpdateProductRequest) returns (UpdateProductResponse)
+
+	@handler DeleteProductHandler
+	delete /api/product/:id (DeleteProductRequest) returns (DeleteProductResponse)
+
+	@handler CreateOrderHandler
+	post /api/order/create (CreateOrderRequest) returns (CreateOrderResponse)
+
+	@handler GetOrderHandler
+	get /api/order/:order_id (GetOrderRequest) returns (GetOrderResponse)
+
+	@handler FlashPurchaseHandler
+	post /api/flashsale/purchase (FlashPurchaseRequest) returns (FlashPurchaseResponse)
+
+	@handler CacheStockHandler
+	post /api/flashsale/cache-stock (CacheStockRequest) returns (CacheStockResponse)
+}
+

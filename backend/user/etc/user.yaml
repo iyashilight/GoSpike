@@ -1,0 +1,7 @@
+Name: user.rpc
+ListenOn: 0.0.0.0:8081
+Mode: dev
+DataSource: ${MYSQL_DSN}
+Cache:
+  - Host: redis:6379
+JwtSecret: ${JWT_SECRET}

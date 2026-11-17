@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package flashsale;
+option go_package="./flashsale";
+
+service Flashsale {
+    rpc CacheStock(CacheStockRequest) returns (CacheStockResponse);
+    rpc FlashPurchase(FlashPurchaseRequest) returns (FlashPurchaseResponse);
+    rpc CreateActivity(CreateActivityRequest) returns (CreateActivityResponse);
+    rpc GetActivity(GetActivityRequest) returns (GetActivityResponse);
+}
+
+message CacheStockRequest {
+    int64 product_id = 1;
+    int32 stock = 2;
+}
+
+message CacheStockResponse {
+}
+
+message FlashPurchaseRequest {
+    int64 user_id = 1;
+    int64 product_id = 2;
+    int32 quantity = 3;
+}
+
+message FlashPurchaseResponse {
+    int64 order_id = 1;
+    string status = 2;
+}
+
+message CreateActivityRequest {
+    int64 product_id = 1;
+    int64 start_time = 2;
+    int64 end_time = 3;
+    int32 stock = 4;
+}
+
+message CreateActivityResponse {
+}
+
+message GetActivityRequest {
+    int64 product_id = 1;
+}
+
+message GetActivityResponse {
+    int64 product_id = 1;
+    int64 start_time = 2;
+    int64 end_time = 3;
+    int32 stock = 4;
+    bool active = 5;
+}

@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS `orders` (
+      `id` BIGINT AUTO_INCREMENT,
+      `user_id` BIGINT NOT NULL,
+      `total_price` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+      `status` VARCHAR(20) NOT NULL DEFAULT 'pending',
+      `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE
+  CURRENT_TIMESTAMP,
+      PRIMARY KEY (`id`)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+  CREATE TABLE IF NOT EXISTS `order_item` (
+      `id` BIGINT AUTO_INCREMENT,
+      `order_id` BIGINT NOT NULL,
+      `product_id` BIGINT NOT NULL,
+      `product_name` VARCHAR(100) NOT NULL DEFAULT '',
+      `price` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+      `quantity` INT NOT NULL DEFAULT 0,
+      `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (`id`)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

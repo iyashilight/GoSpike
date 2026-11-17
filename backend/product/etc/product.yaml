@@ -1,0 +1,6 @@
+Name: product.rpc
+ListenOn: 0.0.0.0:8082
+Mode: dev
+DataSource: ${MYSQL_DSN}
+Cache:
+  - Host: redis:6379
